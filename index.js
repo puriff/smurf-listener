@@ -64,6 +64,8 @@ let smurfMixContract = new ethers.Contract(smurfMixAddress, abiMix, providerPoly
 async function listenSmurfTickets(){
 
     smurfTicketContract.on("Mint_Ticket_Success", async(_from, _recipeId, event) => {
+        console.log("")
+        console.log('------------------------------------')
         console.log("NEW CRYSTAL :"+Number(_recipeId))
 
         console.log("https://polygonscan.com/tx/"+event.transactionHash)
@@ -89,22 +91,7 @@ async function listenSmurfTickets(){
                   {
                     //get ingredient
                     let ingredients = mintRecipeEvent[index].args._ingredients
-                    let recipe = ""
-                      for (let index = 0; index < ingredients.length; index++) {
-                          (ingredients[index] > 99) ? recipe += Number(ingredients[index]) : recipe += ingredientList[Number(ingredients[index])]
-                          if(index < ingredients.length -1) {
-                            recipe += " | "
-                          } 
-                      }
-                      console.log("New recipe is : " +recipe)
-
-                      for (let index = 0; index < ingredients.length; index++) {
-                        //check if there's a potion in the recipe
-                        if(Number(ingredients[index]) > 99) {
-                          console.log(Number(ingredients[index]) +" is a Potion")
-                          getPotionIngredients(currentBlock, Number(ingredients[index]))
-                        }
-                      }
+                    getRecipe(ingredients, eventBlock, "Ticket recipe")
                   }
               }
             }
@@ -119,6 +106,8 @@ async function listenSmurfTickets(){
     })
 
     smurfMixContract.on("New_Recipe_Discovered", async(_from, _recipeId, event) => {
+        console.log("")
+        console.log('------------------------------------')
         console.log("NEW RECIPE :"+_recipeId)
 
         const url = "https://app.thesmurfssociety.com/metadata/public/metadata/cauldron/"+(Number(_recipeId).toString());
@@ -134,22 +123,7 @@ async function listenSmurfTickets(){
             {
               //get ingredient
               let ingredients = mintRecipeEvent[index].args._ingredients
-              let recipe = ""
-              for (let index = 0; index < ingredients.length; index++) {
-                  (ingredients[index] > 99) ? recipe += Number(ingredients[index]) : recipe += ingredientList[Number(ingredients[index])]
-                  if(index < ingredients.length -1) {
-                    recipe += " | "
-                  } 
-              }
-              console.log("New recipe is : " +recipe)
-
-              for (let index = 0; index < ingredients.length; index++) {
-                //check if there's a potion in the recipe
-                if(Number(ingredients[index]) > 99) {
-                  console.log(Number(ingredients[index]) +" is a Potion")
-                  getPotionIngredients(currentBlock, Number(ingredients[index]))
-                }
-              }
+              getRecipe(currentBlock, ingredients, "New recipe")
             }
         }
         console.log("https://polygonscan.com/tx/"+event.transactionHash)
@@ -164,10 +138,12 @@ async function listenSmurfTickets(){
     })
 
     smurfMixContract.on("Mint_Recipe_Success", async(from, _recipe_id,_signature, _ingredients, event) => {
+        console.log("")
+        console.log('------------------------------------')
         console.log("Mint_Recipe_Success : " + _recipe_id)
 
         let currentBlock = event.blockNumber
-        getRecipe(currentBlock, _ingredients, "Minted recipe").then(console.log('------------------------------------'))
+        getRecipe(currentBlock, _ingredients, "Minted recipe")
       })
 
     //RETURN LAST MINT TICKET EVENT
